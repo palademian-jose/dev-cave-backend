@@ -6,6 +6,7 @@ import { postController } from "./controllers/post.controller";
 import { commentController } from "./controllers/comment.controller";
 import { reactionController } from "./controllers/reaction.controller";
 import { profileController } from "./controllers/profile.controller";
+import { uploadController } from "./controllers/upload.controller";
 
 const app = new Elysia()
   .use(cors())
@@ -14,6 +15,7 @@ const app = new Elysia()
   .use(commentController)
   .use(reactionController)
   .use(profileController)
+  .use(uploadController)
   .all("/api/auth/*", betterAuthView);
 
 app.listen(4000);

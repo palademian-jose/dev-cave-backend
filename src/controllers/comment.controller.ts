@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { userMiddleware } from "../middlewares/auth-middleware";
 import { CommentModel } from "../models/comment.model";
+import { User } from "better-auth/types";
 
 export const commentController = new Elysia({ prefix: "/api/comments" }).derive(userMiddleware)
     .post("/:postId/comments", async ({ params: { postId }, body, user }: { params: { postId: string }, body: any, user: any }) => {
@@ -29,10 +30,10 @@ export const commentController = new Elysia({ prefix: "/api/comments" }).derive(
         params: t.Object({
             postId: t.String()
         })
-    }).put("/:id", async ({ params: { id }, body, user }: { params: { id: string }, body: any, user: any }) => {
+    }).put("/:id", async ({ params: { id }, body, user }: { params: { id: string }, body: any, user: User }) => {
         const existingComment = await CommentModel.getCommentById(id);
         if (!existingComment) throw new Error("Comment not found");
-        if (existingComment.ownerId !== user.id) throw new Error("Not authorized");
+        if (existingComment.owner?.id !== user.id) throw new Error("Not authorized");
 
         return await CommentModel.updateComment(id, body);
     }, {
@@ -46,10 +47,10 @@ export const commentController = new Elysia({ prefix: "/api/comments" }).derive(
         body: t.Object({
             content: t.Optional(t.String())
         })
-    }).delete("/:id", async ({ params: { id }, user }: { params: { id: string }, user: any }) => {
+    }).delete("/:id", async ({ params: { id }, user }: { params: { id: string }, user: User }) => {
         const existingComment = await CommentModel.getCommentById(id);
         if (!existingComment) throw new Error("Comment not found");
-        if (existingComment.ownerId !== user.id) throw new Error("Not authorized");
+        if (existingComment.owner?.id !== user.id) throw new Error("Not authorized");
 
         await CommentModel.deleteComment(id);
         return { success: true };

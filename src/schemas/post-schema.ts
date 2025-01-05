@@ -16,18 +16,18 @@ export const comment = pgTable("comment", {
     content: text("content").notNull(),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
-    postId: text("post_id").notNull().references(() => post.id), // Comment belongs to a post
-    ownerId: text("owner_id").notNull().references(() => user.id), // Comment created by a user
-    parentId: uuid("parent_id").references((): any => comment.id)
+    postId: uuid("post_id").notNull().references(() => post.id),
+    ownerId: text("owner_id").notNull().references(() => user.id),
+    parentId: uuid("parent_id").references((): any => comment.id, { onDelete: 'set null' }) // Optional parent comment ID
 });
 
 export const reaction = pgTable("reaction", {
     id: uuid("id").primaryKey().defaultRandom(),
-    type: varchar("type", { length: 50 }).notNull(), // Reaction type like "like", "love", etc.
-    createdAt: timestamp("created_at").notNull(), 
+    type: varchar("type", { length: 50 }).notNull(),
+    createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
-    postId: text("post_id").notNull().references(() => post.id),
+    postId: uuid("post_id").notNull().references(() => post.id),
     userId: text("user_id").notNull().references(() => user.id)
-}, (reaction) => [{
-    uniqueReaction: unique().on(reaction.postId, reaction.userId) // Ensure user reacts to a post only once
-}]);
+}, (reaction) => ({
+    uniqueReaction: unique().on(reaction.postId, reaction.userId)
+}));
